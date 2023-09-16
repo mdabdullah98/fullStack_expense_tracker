@@ -4,5 +4,10 @@ const userControler = require("../controller/user");
 
 userRouter
   .post("/user/signup", userControler.signup)
-  .post("/user/login", userControler.login);
+  .post("/user/login", userControler.login)
+  .post("/user/expense", userControler.expense)
+  .post("/user/income", userControler.income)
+  .get("/user/getExpenseAndIncome", userControler.getExpenses)
+  .delete("/user/deleteExpense/:id", userControler.deleteExpense);
+// .post("/user/getIncomes", userControler.getIncomes);
 module.exports = userRouter;
