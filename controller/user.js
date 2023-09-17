@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const Expense = require("../models/expense");
 const Income = require("../models/income");
+const Order = require("../models/order");
 const jwt = require("jsonwebtoken");
 
 const verifyJwt = (token) => {
@@ -40,7 +41,6 @@ exports.login = async (req, res) => {
       bcrypt.compare(psw, user.psw, function (err, result) {
         if (err) throw Error(err);
         if (result) {
-          res.cookie("token", `${user.token}`);
           res.json(user.token);
         } else {
           res.status(401).json("password is incorrect");
@@ -69,6 +69,7 @@ exports.expense = async (req, res) => {
         catagory,
         userId: user.id,
       });
+      res.redirect(301, "http://localhost:5173/");
     }
   } catch (err) {
     res.status(500).json(err);
@@ -126,5 +127,31 @@ exports.deleteExpense = async (req, res) => {
     res.status(200).json(deletedExpense);
   } catch (err) {
     res.status(500).json({ err: err, message: "someting went wrong" });
+  }
+};
+
+exports.getUSer = async (req, res) => {
+  try {
+    const token = req.get("Authorization");
+    const { email } = verifyJwt(token);
+    const user = await User.findOne({ where: { email: email } });
+    const order = await Order.findOne({
+      where: { userId: user.id, payment_status: "Success" },
+    });
+    console.log("orde newr======", order);
+    if (!user) {
+      res.status(404).send("user not found");
+    }
+
+    res.status(200).json({
+      username: user.username,
+      email: user.email,
+      key_ID: process.env.RAZOR_PAY_KEY_ID,
+      id: user.id,
+      order_id: order ? order.order_id : "",
+      payment_status: order ? order.payment_status : "",
+    });
+  } catch (err) {
+    res.status(500).json({ err: err, message: "something goes wrong" });
   }
 };

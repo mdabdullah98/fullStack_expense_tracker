@@ -8,6 +8,7 @@ userRouter
   .post("/user/expense", userControler.expense)
   .post("/user/income", userControler.income)
   .get("/user/getExpenseAndIncome", userControler.getExpenses)
+  .get("/user/getUserDeatils", userControler.getUSer)
   .delete("/user/deleteExpense/:id", userControler.deleteExpense);
 // .post("/user/getIncomes", userControler.getIncomes);
 module.exports = userRouter;
