@@ -82,8 +82,7 @@ exports.expense = async (req, res) => {
       });
       await expense.save();
     }
-    console.log(typeof +spent, typeof expense.spent);
-    res.end();
+    res.resdirect(301, "http://localhost:5173/");
   } catch (err) {
     res.status(500).json(err);
   }
@@ -96,7 +95,7 @@ exports.income = async (req, res) => {
   try {
     const user = await User.findOne({ where: { email: email } });
     if (user) {
-      Income.create({
+      await Income.create({
         username: user.username,
         email: user.email,
         earnings,
@@ -104,6 +103,7 @@ exports.income = async (req, res) => {
         userId: user.id,
       });
     }
+    res.resdirect(301, "http://localhost:5173/");
   } catch (err) {
     res.status(500).json(err);
   }
