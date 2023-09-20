@@ -7,11 +7,21 @@ const Expense = db.define("expense", {
     autoIncrement: true,
     primaryKey: true,
   },
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
 
   spent: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
+
   describe: {
     type: DataTypes.STRING,
     allowNull: false,

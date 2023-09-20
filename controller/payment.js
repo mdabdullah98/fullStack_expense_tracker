@@ -1,6 +1,7 @@
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const Order = require("../models/order");
+// const { default: orders } = require("razorpay/dist/types/orders");
 
 exports.paymentCheckout = async (req, res) => {
   const { username, email, id } = req.body;
@@ -50,23 +51,17 @@ exports.paymentVerify = async (req, res) => {
 
   const isSignatureValid = generatedSignature == razorpay_signature;
   if (isSignatureValid) {
-    Order.findOne({
-      where: { email: email, payment_status: "pending" },
-    })
-      .then((order) => {
-        order.update({
-          payment_status: "Success",
-        });
-        return order.save();
-      })
-      .then((updated) => {
-        res.redirect(
-          `http://localhost:5173/user/payment_success?refrence=${razorpay_payment_id}`
-        );
-      })
-      .catch((err) => {
-        res.status.send("order not found");
-      });
+    const findOrder = await Order.findOne({
+      where: { email: email, order_id: razorpay_order_id },
+    });
+    await findOrder.update({
+      payment_status: "success",
+    });
+    await findOrder.save();
+
+    res.redirect(
+      `http://localhost:5173/user/payment_success?refrence=${razorpay_payment_id}`
+    );
   } else {
     res.status(400).json({ success: false, message: "payment did not verify" });
   }

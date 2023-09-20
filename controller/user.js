@@ -62,15 +62,28 @@ exports.expense = async (req, res) => {
 
   try {
     const user = await User.findOne({ where: { email: email } });
-    if (user) {
-      Expense.create({
-        spent,
+    const expense = await Expense.findOne({
+      where: { email: email, catagory: catagory },
+    });
+    if (!expense) {
+      const expense = await Expense.create({
+        username: user.username,
+        email: user.email,
+        spent: +spent,
         describe,
         catagory,
+
         userId: user.id,
       });
-      res.redirect(301, "http://localhost:5173/");
+    } else {
+      await expense.update({
+        spent: expense.spent + +spent,
+        describe: describe,
+      });
+      await expense.save();
     }
+    console.log(typeof +spent, typeof expense.spent);
+    res.end();
   } catch (err) {
     res.status(500).json(err);
   }
@@ -84,6 +97,8 @@ exports.income = async (req, res) => {
     const user = await User.findOne({ where: { email: email } });
     if (user) {
       Income.create({
+        username: user.username,
+        email: user.email,
         earnings,
         describe,
         userId: user.id,
@@ -136,9 +151,9 @@ exports.getUSer = async (req, res) => {
     const { email } = verifyJwt(token);
     const user = await User.findOne({ where: { email: email } });
     const order = await Order.findOne({
-      where: { userId: user.id, payment_status: "Success" },
+      where: { userId: user.id, payment_status: "success" },
     });
-    console.log("orde newr======", order);
+
     if (!user) {
       res.status(404).send("user not found");
     }
@@ -153,5 +168,14 @@ exports.getUSer = async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ err: err, message: "something goes wrong" });
+  }
+};
+
+exports.getAllExpenses = async (req, res) => {
+  try {
+    const expense = await Expense.findAll();
+    res.status(200).json(expense);
+  } catch (err) {
+    res.status(400).json({ err: err, message: "something goes wrong" });
   }
 };
