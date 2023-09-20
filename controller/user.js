@@ -5,7 +5,6 @@ const Expense = require("../models/expense");
 const Income = require("../models/income");
 const Order = require("../models/order");
 const jwt = require("jsonwebtoken");
-const { Sequelize } = require("sequelize");
 
 const verifyJwt = (token) => {
   return jwt.verify(token, process.env.SECRET);
@@ -73,7 +72,6 @@ exports.expense = async (req, res) => {
         spent: +spent,
         describe,
         catagory,
-
         userId: user.id,
       });
     } else {
@@ -83,7 +81,11 @@ exports.expense = async (req, res) => {
       });
       await expense.save();
     }
-    res.resdirect(301, "http://localhost:5173/");
+
+    await user.update({ total_expense: user.total_expense + +spent });
+    return user.save();
+
+    // res.resdirect(301, "http://localhost:5173/");
   } catch (err) {
     res.status(500).json(err);
   }
@@ -99,12 +101,16 @@ exports.income = async (req, res) => {
       await Income.create({
         username: user.username,
         email: user.email,
-        earnings,
+        earnings: +earnings,
         describe,
         userId: user.id,
       });
     }
-    res.resdirect(301, "http://localhost:5173/");
+    await user.update({
+      total_income: user.total_income + +earnings,
+    });
+    return user.save();
+    // res.resdirect(301, "http://localhost:5173/");
   } catch (err) {
     res.status(500).json(err);
   }
@@ -174,30 +180,12 @@ exports.getUSer = async (req, res) => {
 
 exports.getAllExpenses = async (req, res) => {
   try {
-    const aggregrateUSer = await User.findAll({
-      attributes: [
-        "id",
-        "username",
-        [Sequelize.fn("sum", Sequelize.col("spent")), "total_cost"],
-      ],
-      include: [
-        {
-          model: Expense,
-          attributes: [],
-        },
-      ],
-      group: ["user.id"],
-      order: [["total_cost", "DESC"]],
+    const aggregrateExpense = await User.findAll({
+      attributes: ["username", "total_expense"],
+      order: [["total_expense", "DESC"]],
     });
-    // const expense = await Expense.findAll({
-    //   attributes: [
-    //     "userId",
-    //     [Sequelize.fn("sum", Sequelize.col("expenses.spent")), "total_cost"],
-    //   ],
-    //   group: ["userId"],
-    // });
 
-    res.status(200).json(aggregrateUSer);
+    res.status(200).json(aggregrateExpense);
   } catch (err) {
     res.status(400).json({ err: err, message: "something goes wrong" });
   }
