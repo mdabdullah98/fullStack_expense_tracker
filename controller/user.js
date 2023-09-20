@@ -173,8 +173,27 @@ exports.getUSer = async (req, res) => {
 
 exports.getAllExpenses = async (req, res) => {
   try {
+    const user = await User.findAll();
     const expense = await Expense.findAll();
-    res.status(200).json(expense);
+    const aggreGateExpense = {};
+    const leaderBoard = [];
+    expense.forEach((expense) => {
+      if (aggreGateExpense[expense.userId]) {
+        aggreGateExpense[expense.userId] =
+          aggreGateExpense[expense.userId] + expense.spent;
+      } else {
+        aggreGateExpense[expense.userId] = expense.spent;
+      }
+    });
+
+    user.forEach((user, index) => {
+      leaderBoard.push({
+        username: user.username,
+        total_cost: aggreGateExpense[user.id],
+      });
+    });
+
+    res.status(200).json(leaderBoard);
   } catch (err) {
     res.status(400).json({ err: err, message: "something goes wrong" });
   }
