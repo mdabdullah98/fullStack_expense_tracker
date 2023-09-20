@@ -5,6 +5,7 @@ const Expense = require("../models/expense");
 const Income = require("../models/income");
 const Order = require("../models/order");
 const jwt = require("jsonwebtoken");
+const { Sequelize } = require("sequelize");
 
 const verifyJwt = (token) => {
   return jwt.verify(token, process.env.SECRET);
@@ -173,27 +174,30 @@ exports.getUSer = async (req, res) => {
 
 exports.getAllExpenses = async (req, res) => {
   try {
-    const user = await User.findAll();
-    const expense = await Expense.findAll();
-    const aggreGateExpense = {};
-    const leaderBoard = [];
-    expense.forEach((expense) => {
-      if (aggreGateExpense[expense.userId]) {
-        aggreGateExpense[expense.userId] =
-          aggreGateExpense[expense.userId] + expense.spent;
-      } else {
-        aggreGateExpense[expense.userId] = expense.spent;
-      }
+    const aggregrateUSer = await User.findAll({
+      attributes: [
+        "id",
+        "username",
+        [Sequelize.fn("sum", Sequelize.col("spent")), "total_cost"],
+      ],
+      include: [
+        {
+          model: Expense,
+          attributes: [],
+        },
+      ],
+      group: ["user.id"],
+      order: [["total_cost", "DESC"]],
     });
+    // const expense = await Expense.findAll({
+    //   attributes: [
+    //     "userId",
+    //     [Sequelize.fn("sum", Sequelize.col("expenses.spent")), "total_cost"],
+    //   ],
+    //   group: ["userId"],
+    // });
 
-    user.forEach((user, index) => {
-      leaderBoard.push({
-        username: user.username,
-        total_cost: aggreGateExpense[user.id],
-      });
-    });
-
-    res.status(200).json(leaderBoard);
+    res.status(200).json(aggregrateUSer);
   } catch (err) {
     res.status(400).json({ err: err, message: "something goes wrong" });
   }
