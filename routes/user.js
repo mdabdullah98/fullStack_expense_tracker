@@ -7,9 +7,10 @@ userRouter
   .post("/user/login", userControler.login)
   .post("/user/expense", userControler.expense)
   .post("/user/income", userControler.income)
+  .post("/user/password/forgotpassword", userControler.recoverPassword)
   .get("/user/getExpenseAndIncome", userControler.getExpenseAndIncome)
   .get("/user/getUserDeatils", userControler.getUSer)
-  .get("/user/get_all_expenses", userControler.getAllExpenses)
+  .get("/user/get_total_expense", userControler.getTotalExpense)
   .delete("/user/deleteExpense/:id", userControler.deleteExpense);
 // .post("/user/getIncomes", userControler.getIncomes);
 module.exports = userRouter;
