@@ -59,9 +59,10 @@ exports.paymentVerify = async (req, res) => {
     });
     await findOrder.save();
 
-    res.redirect(
-      `http://localhost:5173/user/payment_success?refrence=${razorpay_payment_id}`
-    );
+    // res.redirect(
+    //   `http://localhost:5173/user/payment_success?refrence=${razorpay_payment_id}`
+    // );
+    res.status(200).send("payment sucessful");
   } else {
     res.status(400).json({ success: false, message: "payment did not verify" });
   }

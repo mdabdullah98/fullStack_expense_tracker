@@ -116,7 +116,7 @@ exports.income = async (req, res) => {
   }
 };
 
-exports.getExpenses = async (req, res) => {
+exports.getExpenseAndIncome = async (req, res) => {
   const token = req.get("Authorization");
   const { email } = verifyJwt(token);
 
@@ -128,6 +128,10 @@ exports.getExpenses = async (req, res) => {
       res.status(200).json({
         expense: expenses,
         income: income,
+        user: {
+          total_expense: user.total_expense,
+          total_income: user.total_income,
+        },
       });
     } else {
       res.json("did not get any expenses and income");
@@ -141,11 +145,18 @@ exports.deleteExpense = async (req, res) => {
   const { id } = req.params;
   try {
     const expense = await Expense.findByPk(id);
+    const user = await User.findByPk(expense.userId);
     if (!expense) {
-      res.status(404).send("expense not found");
+      return res.status(404).send("expense not found");
     }
 
     const deletedExpense = await expense.destroy();
+    // updating user total expense when deleting ecpense so the amount should also be decrease
+    await user.update({
+      total_expense: user.total_expense - expense.spent,
+    });
+    await user.save();
+
     res.status(200).json(deletedExpense);
   } catch (err) {
     res.status(500).json({ err: err, message: "someting went wrong" });
