@@ -5,7 +5,10 @@ const Expense = require("../models/expense");
 const Income = require("../models/income");
 const Order = require("../models/order");
 const jwt = require("jsonwebtoken");
-
+const SibApiV3Sdk = require("sib-api-v3-sdk");
+const client = SibApiV3Sdk.ApiClient.instance;
+const apiKey = client.authentications["api-key"];
+apiKey.apiKey = process.env.SMPT_API_KEY;
 const verifyJwt = (token) => {
   return jwt.verify(token, process.env.SECRET);
 };
@@ -230,6 +233,36 @@ exports.getTotalExpense = async (req, res) => {
   }
 };
 
-exports.recoverPassword = (req, res) => {
-  res.end("recover passeword");
+exports.recoverPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const transacEmailApi = new SibApiV3Sdk.TransactionalEmailsApi();
+
+    const sender = {
+      email: "expenseTracker@expense.com",
+      name: "expense_tracker",
+    };
+    const receivers = [
+      {
+        email: email,
+      },
+    ];
+
+    const sendemail = await transacEmailApi.sendTransacEmail({
+      sender,
+      to: receivers,
+      subject: "reset your password ",
+      textContent: "test email for password reset",
+      htmlContent: `<div>
+    <h3>recover your password </h3>
+    <button style='border:none;outline:none;background:lightcyan;padding:.5rem 2rem;border-radius:.3rem ;'><a href='http://localhost:5173/user/forgot_password' style='text-decoration:none;color:black;font-size:1.2rem;'>visit link</a></button>
+    </div>`,
+    });
+    console.log(sendemail);
+    // res.status(200).json(sendInblueMessageRes);
+    res.status(200).json(sendemail);
+  } catch (err) {
+    res.status(400).send("bad request");
+  }
 };
