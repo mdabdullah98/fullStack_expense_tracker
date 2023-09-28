@@ -1,29 +1,34 @@
 const { DataTypes } = require("sequelize");
 const db = require("../utils/databse");
-const Income = db.define("income", {
-  id: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    autoIncrement: true,
-    primaryKey: true,
-  },
-  username: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+const Income = db.define(
+  "income",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
 
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
 
-  earnings: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
+    earnings: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    income_description: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    date: DataTypes.DATE,
   },
-  describe: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-});
+  { timestamps: false }
+);
 module.exports = Income;

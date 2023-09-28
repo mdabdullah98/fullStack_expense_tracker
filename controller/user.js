@@ -83,6 +83,7 @@ exports.expense = async (req, res) => {
         spent: +spent,
         describe,
         catagory,
+        date: new Date(Date.now()),
         userId: user.id,
       });
     } else {
@@ -94,9 +95,10 @@ exports.expense = async (req, res) => {
     }
 
     await user.update({ total_expense: user.total_expense + +spent });
-    return user.save();
+    await user.save();
 
     // res.resdirect(301, "http://localhost:5173/");
+    return res.status(200).json({ succes: true, message: "added succesfully" });
   } catch (err) {
     res.status(500).json(err);
   }
@@ -116,7 +118,8 @@ exports.income = async (req, res) => {
         username: user.username,
         email: user.email,
         earnings: +earnings,
-        describe,
+        income_description: describe,
+        date: new Date(Date.now()),
         userId: user.id,
       });
     }
@@ -140,12 +143,23 @@ exports.getExpenseAndIncome = async (req, res) => {
 
   try {
     const user = await User.findOne({ where: { email: email } });
-    const expenses = await Expense.findAll({ where: { userId: user.id } });
-    const income = await Income.findAll({ where: { userId: user.id } });
-    if (expenses || income) {
+
+    const dataExpense = await User.findByPk(user.id, {
+      include: [
+        {
+          model: Expense,
+          attributes: ["spent", "describe", "catagory", "date"], // You can specify which attributes you want to retriev
+        },
+        {
+          model: Income,
+          attributes: ["earnings", "income_description", "date"], // You can specify which attributes you want to retrieve
+        },
+      ],
+    });
+    if (dataExpense) {
+      console.log(dataExpense);
       res.status(200).json({
-        expense: expenses,
-        income: income,
+        expenseAndIncome: dataExpense,
         user: {
           total_expense: user.total_expense,
           total_income: user.total_income,
