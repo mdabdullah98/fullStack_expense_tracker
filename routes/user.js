@@ -10,6 +10,7 @@ userRouter
   .get("/user/getExpenseAndIncome", userControler.getExpenseAndIncome)
   .get("/user/getUserDeatils", userControler.getUSer)
   .get("/user/get_total_expense", userControler.getTotalExpense)
+  .get("/user/download_expense/:id", userControler.downloadExpense)
   .delete("/user/deleteExpense/:id", userControler.deleteExpense);
 // .post("/user/getIncomes", userControler.getIncomes);
 module.exports = userRouter;

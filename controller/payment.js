@@ -1,7 +1,6 @@
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const Order = require("../models/order");
-// const { default: orders } = require("razorpay/dist/types/orders");
 
 exports.paymentCheckout = async (req, res) => {
   const { username, email, id } = req.body;

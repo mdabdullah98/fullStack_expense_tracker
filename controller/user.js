@@ -5,6 +5,7 @@ const Expense = require("../models/expense");
 const Income = require("../models/income");
 const Order = require("../models/order");
 const jwt = require("jsonwebtoken");
+const aws = require("aws-sdk");
 
 const verifyJwt = (token) => {
   return jwt.verify(token, process.env.SECRET);
@@ -80,7 +81,7 @@ exports.expense = async (req, res) => {
       const expense = await Expense.create({
         username: user.username,
         email: user.email,
-        spent: +spent,
+        spent: Number(spent),
         describe,
         catagory,
         date: new Date(Date.now()),
@@ -88,13 +89,13 @@ exports.expense = async (req, res) => {
       });
     } else {
       await expense.update({
-        spent: expense.spent + +spent,
+        spent: expense.spent + Number(spent),
         describe: describe,
       });
       await expense.save();
     }
 
-    await user.update({ total_expense: user.total_expense + +spent });
+    await user.update({ total_expense: user.total_expense + Number(spent) });
     await user.save();
 
     // res.resdirect(301, "http://localhost:5173/");
@@ -148,19 +149,19 @@ exports.getExpenseAndIncome = async (req, res) => {
       include: [
         {
           model: Expense,
-          attributes: ["spent", "describe", "catagory", "date"], // You can specify which attributes you want to retriev
+          attributes: ["spent", "describe", "catagory", "date", "id"], // You can specify which attributes you want to retriev
         },
         {
           model: Income,
-          attributes: ["earnings", "income_description", "date"], // You can specify which attributes you want to retrieve
+          attributes: ["earnings", "income_description", "date", "id"], // You can specify which attributes you want to retrieve
         },
       ],
     });
     if (dataExpense) {
-      console.log(dataExpense);
       res.status(200).json({
         expenseAndIncome: dataExpense,
         user: {
+          id: user.id,
           total_expense: user.total_expense,
           total_income: user.total_income,
         },
@@ -241,5 +242,48 @@ exports.getTotalExpense = async (req, res) => {
     res.status(200).json(aggregrateExpense);
   } catch (err) {
     res.status(400).json({ err: err, message: "something goes wrong" });
+  }
+};
+
+//download expense
+const uploadToS3Bucket = (data, filename) => {
+  let s3Bucket = new aws.S3({
+    accessKeyId: process.env.AWS_IAM_USER_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_IAM_USER_SECRET_KEY,
+  });
+  const params = {
+    Bucket: process.env.AWS_S3_BUCKET_NAME,
+    Key: filename,
+    ACL: "public-read",
+    Body: data,
+  };
+  return new Promise((resolve, reject) => {
+    s3Bucket.upload(params, (err, s3Response) => {
+      if (err) {
+        console.log("someting went worng", err);
+        reject();
+      } else {
+        resolve(s3Response.Location);
+      }
+    });
+  });
+};
+
+exports.downloadExpense = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const expense = await Expense.findAll({
+      attributes: ["spent", "catagory", "describe"],
+      where: { userId: id },
+    });
+    const stringiFiedExpense = JSON.stringify(expense);
+    const filename = `expense_${id} / ${new Date()}`;
+    const fileUrl = await uploadToS3Bucket(stringiFiedExpense, filename);
+
+    res.status(200).json({ success: true, fileUrl });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ success: false, message: "file url is emty", err: err });
   }
 };
