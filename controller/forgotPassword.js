@@ -1,16 +1,23 @@
 require("dotenv").config();
+
 const bcrypt = require("bcrypt");
+
 const SibApiV3Sdk = require("sib-api-v3-sdk");
+
 const uuid = require("uuid");
 
 //creating instance for the transacEmail using  sedinblue library
 const client = SibApiV3Sdk.ApiClient.instance;
+
 const apiKey = client.authentications["api-key"];
+
 apiKey.apiKey = process.env.SMPT_API_KEY;
 
 //seqelize ForgotPassword models
 const User = require("../models/user");
+
 const ForgotPassword = require("../models/forgotPassword");
+
 const forgotPasswordRouter = require("../routes/forgotPassword");
 
 exports.ForgotPassword = async (req, res) => {

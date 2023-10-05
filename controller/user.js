@@ -66,7 +66,7 @@ exports.login = async (req, res) => {
 
 // //accroding to login user I am stroing income into the databse .Here i used  post request to this api endpoint axios.post('http://localhost:8080/user/income), after hitting the backend routes storing the income into the income table.storing the Expense according the logged userid so that when we doing get request on expense table so send only that user data which is logged in
 
-exports.expense = async (req, res) => {
+exports.addExpenseToDB = async (req, res) => {
   const input = req.body.input;
   const { spent, describe, catagory } = input;
   const { token } = req.body;
@@ -110,7 +110,7 @@ exports.expense = async (req, res) => {
 };
 
 //accroding to login user I am stroing income into the databse .Here i used  post request to this api endpoint axios.post('http://localhost:8080/user/income), after hitting the backend routes storing the income into the income table.Storing the income according the logged userid so that when we doing get request on income table so send only that user data which is logged in user.
-exports.income = async (req, res) => {
+exports.addIncomeToDB = async (req, res) => {
   const { input } = req.body;
   const { earnings, describe } = input;
   const { token } = req.body;
