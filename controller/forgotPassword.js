@@ -72,7 +72,6 @@ exports.ForgotPassword = async (req, res) => {
         .catch((err) => {
           if (err) throw new Error(err);
         });
-      // res.status(200).json(sendInblueMessageRes);
 
       res.status(200).json({ success: true });
     } else {

@@ -101,7 +101,11 @@ exports.expense = async (req, res) => {
     // res.resdirect(301, "http://localhost:5173/");
     return res.status(200).json({ succes: true, message: "added succesfully" });
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({
+      err: err,
+      succes: false,
+      message: "something went wrong please try again",
+    });
   }
 };
 
@@ -128,10 +132,15 @@ exports.income = async (req, res) => {
     await user.update({
       total_income: user.total_income + +earnings,
     });
-    return user.save();
+    user.save();
     // res.resdirect(301, "http://localhost:5173/");
+    return res.status(200).json({ succes: true, message: "added succesfully" });
   } catch (err) {
-    res.status(500).json(err);
+    res.status(500).json({
+      err: err,
+      succes: false,
+      message: "something went wrong please try again",
+    });
   }
 };
 
