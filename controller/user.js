@@ -36,34 +36,6 @@ exports.signup = (req, res) => {
   }
 };
 
-// when user hit login button get the data accodring to email id and then
-//using bycrypt.campare method and comparing the stored password in database with the typed password by the user which is commin in req.body
-
-exports.login = async (req, res) => {
-  const { email, psw } = req.body;
-
-  try {
-    //find user accroding to the email which is coming in the req.body if no user found then goin in else part
-    const user = await User.findOne({ where: { email: email } });
-    if (user) {
-      //comparing the password if the hash password is === to req.body.psw then seingin res.json(user.token); else res.status(401).json("password is incorrect");
-
-      bcrypt.compare(psw, user.psw, function (err, result) {
-        if (err) throw Error(err);
-        if (result) {
-          res.json(user.token);
-        } else {
-          res.status(401).json("password is incorrect");
-        }
-      });
-    } else {
-      res.status(404).json("email does not exist");
-    }
-  } catch (err) {
-    res.status(500).json(err);
-  }
-};
-
 // //accroding to login user I am stroing income into the databse .Here i used  post request to this api endpoint axios.post('http://localhost:8080/user/income), after hitting the backend routes storing the income into the income table.storing the Expense according the logged userid so that when we doing get request on expense table so send only that user data which is logged in
 
 exports.addExpenseToDB = async (req, res) => {
@@ -144,6 +116,34 @@ exports.addIncomeToDB = async (req, res) => {
   }
 };
 
+// when user hit login button get the data accodring to email id and then
+//using bycrypt.campare method and comparing the stored password in database with the typed password by the user which is commin in req.body
+
+exports.login = async (req, res) => {
+  const { email, psw } = req.body;
+
+  try {
+    //find user accroding to the email which is coming in the req.body if no user found then goin in else part
+    const user = await User.findOne({ where: { email: email } });
+    if (user) {
+      //comparing the password if the hash password is === to req.body.psw then seingin res.json(user.token); else res.status(401).json("password is incorrect");
+
+      bcrypt.compare(psw, user.psw, function (err, result) {
+        if (err) throw Error(err);
+        if (result) {
+          res.json(user.token);
+        } else {
+          res.status(401).json("password is incorrect");
+        }
+      });
+    } else {
+      res.status(404).json("email does not exist");
+    }
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+
 // getExpenseAndIncome this function getting all the expense ,income and user  accroding to logged in user
 // this function acces three tables and return all three tables data at once so that i dont have to multiple request to the server
 
@@ -180,34 +180,6 @@ exports.getExpenseAndIncome = async (req, res) => {
     }
   } catch (err) {
     res.status(500).json(err);
-  }
-};
-
-//if expense found then  using desotry method on foudn expense. adn updating the user total_expense and decreasing the amound  by deleted expnense.amount.
-exports.deleteExpense = async (req, res) => {
-  const { id } = req.params;
-  try {
-    //finde the expense and Getting the user table laso so that i can update the total_expense column in user table
-    const expense = await Expense.findByPk(id);
-    const user = await User.findByPk(expense.userId);
-
-    // If no expense found so sending this returning return  res.status(404).send("expense not found"); .Why am I using return ? becouase if no expense foudn then do not  need to executing ferther.
-    if (!expense) {
-      return res.status(404).send("expense not found");
-    }
-
-    // Deleting the expense accoring the id , first i find the expense using user sequelize findbyPk method from expense table.
-    const deletedExpense = await expense.destroy();
-    // updating user total expense when deleting ecpense so the amount should also be decrease
-
-    await user.update({
-      total_expense: user.total_expense - expense.spent,
-    });
-    await user.save();
-
-    res.status(200).json(deletedExpense);
-  } catch (err) {
-    res.status(500).json({ err: err, message: "someting went wrong" });
   }
 };
 
@@ -254,6 +226,34 @@ exports.getTotalExpense = async (req, res) => {
   }
 };
 
+//if expense found then  using desotry method on foudn expense. adn updating the user total_expense and decreasing the amound  by deleted expnense.amount.
+exports.deleteExpense = async (req, res) => {
+  const { id } = req.params;
+  try {
+    //finde the expense and Getting the user table laso so that i can update the total_expense column in user table
+    const expense = await Expense.findByPk(id);
+    const user = await User.findByPk(expense.userId);
+
+    // If no expense found so sending this returning return  res.status(404).send("expense not found"); .Why am I using return ? becouase if no expense foudn then do not  need to executing ferther.
+    if (!expense) {
+      return res.status(404).send("expense not found");
+    }
+
+    // Deleting the expense accoring the id , first i find the expense using user sequelize findbyPk method from expense table.
+    const deletedExpense = await expense.destroy();
+    // updating user total expense when deleting ecpense so the amount should also be decrease
+
+    await user.update({
+      total_expense: user.total_expense - expense.spent,
+    });
+    await user.save();
+
+    res.status(200).json(deletedExpense);
+  } catch (err) {
+    res.status(500).json({ err: err, message: "someting went wrong" });
+  }
+};
+
 //download expense
 const uploadToS3Bucket = (data, filename) => {
   let s3Bucket = new aws.S3({
@@ -269,7 +269,6 @@ const uploadToS3Bucket = (data, filename) => {
   return new Promise((resolve, reject) => {
     s3Bucket.upload(params, (err, s3Response) => {
       if (err) {
-        console.log("someting went worng", err);
         reject();
       } else {
         resolve(s3Response.Location);

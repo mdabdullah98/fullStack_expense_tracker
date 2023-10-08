@@ -1,5 +1,8 @@
 const express = require("express");
 const sequelize = require("./utils/databse");
+const helmet = require("helmet");
+const morgan = require("morgan");
+const fs = require("fs");
 
 // all model required so that it can sync properly theres new to that but as of now I am doing this way
 const User = require("./models/user");
@@ -13,6 +16,7 @@ const paymentRouter = require("./routes/payment");
 const forgotPasswordRouter = require("./routes/forgotPassword");
 
 const cors = require("cors");
+const path = require("path");
 
 const server = express();
 const Port = 8080 || process.env.Port;
@@ -20,11 +24,18 @@ const Port = 8080 || process.env.Port;
 server.use(cors());
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
+server.use(helmet());
 
 //server routes middleware
 server.use("/", userRouter);
 server.use("/api/user", paymentRouter);
 server.use("/user", forgotPasswordRouter);
+
+//creating acces log
+const accessLog = fs.createWriteStream(path.join(__dirname, "accesslog"), {
+  flags: "a",
+});
+server.use(morgan("combined", { stream: accessLog }));
 
 //sql realtion over here
 //expense realtion with user where once user can post many expense as it is one-to-many relationship
