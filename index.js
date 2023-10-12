@@ -36,6 +36,7 @@ const accessLog = fs.createWriteStream(path.join(__dirname, "accesslog"), {
   flags: "a",
 });
 server.use(morgan("combined", { stream: accessLog }));
+console.log("dirname", __dirname);
 
 //sql realtion over here
 //expense realtion with user where once user can post many expense as it is one-to-many relationship
