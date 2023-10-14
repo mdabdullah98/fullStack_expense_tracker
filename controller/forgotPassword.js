@@ -143,3 +143,7 @@ exports.updatePassword = async (req, res) => {
     res.status(500).json({ err: err });
   }
 };
+
+exports.showReserForm = (req, res) => {
+  res.send("please reset your password");
+};
