@@ -1,8 +1,10 @@
 const express = require("express");
-const sequelize = require("./utils/databse");
+const sequelize = require("./utils/database");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const fs = require("fs");
+const cors = require("cors");
+const path = require("path");
 
 // all model required so that it can sync properly theres new to that but as of now I am doing this way
 const User = require("./models/user");
@@ -15,14 +17,12 @@ const userRouter = require("./routes/user");
 const paymentRouter = require("./routes/payment");
 const forgotPasswordRouter = require("./routes/forgotPassword");
 
-const cors = require("cors");
-const path = require("path");
-
 const server = express();
 const Port = process.env.Port || 4000;
 
 server.use(cors());
 server.use(express.json());
+server.use(express.static("dist"));
 server.use(express.urlencoded({ extended: true }));
 server.use(helmet());
 
