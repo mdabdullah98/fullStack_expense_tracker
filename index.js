@@ -23,6 +23,7 @@ const Port = process.env.Port || 4000;
 
 server.use(cors());
 server.use(express.json());
+server.use(express.static("dist"));
 server.use(express.urlencoded({ extended: true }));
 server.use(helmet());
 
