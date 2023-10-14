@@ -6,6 +6,9 @@ forgotPasswordRouter
   .get(
     "/password/authenticate_link/:id",
     ForgotPasswordController.authenticateLink
+  ).get(
+    "/user/password/reset_password/:id",
+    ForgotPasswordController.showReserForm
   )
   .post("/password/forgotpassword", ForgotPasswordController.ForgotPassword)
   .post(
