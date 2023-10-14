@@ -62,7 +62,7 @@ exports.ForgotPassword = async (req, res) => {
         <div>
         <h3>recover your password </h3>
         <form
-          action="http://localhost:5173/user/password/reset_password/${id}"
+          action="http://43.204.103.209:4001/user/password/reset_password/${id}"
           method="GET"
         >
           <button style="border:none;outline:none;background:lightcyan;padding:.5rem 2rem;border-radius:.3rem ; cursor:pointer;">

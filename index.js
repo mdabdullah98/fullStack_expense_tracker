@@ -18,11 +18,8 @@ const paymentRouter = require("./routes/payment");
 const forgotPasswordRouter = require("./routes/forgotPassword");
 
 const server = express();
-<<<<<<< HEAD
+
 const Port = 4001 || process.env.PORT;
-=======
-const Port = 4000;
->>>>>>> b0e26a926efbf23de4e18d87cff20b828baf9c0b
 
 server.use(cors());
 server.use(express.json());
